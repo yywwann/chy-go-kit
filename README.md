@@ -1,4 +1,4 @@
-# chy-go-kit
+# go-kit
 
 ## OSS
 
