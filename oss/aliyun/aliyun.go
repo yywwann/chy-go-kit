@@ -129,7 +129,12 @@ func (ali *Aliyun) UploadPart(key, uploadId string, body io.Reader, partNumber i
 		Bucket:   ali.cfg.Bucket,
 	}
 
-	part, err := bucket.UploadPart(imur, body, oss.GetSize(body), int(partNumber))
+	size, err := oss.GetReaderLen(body)
+	if err != nil {
+		return
+	}
+
+	part, err := bucket.UploadPart(imur, body, size, int(partNumber))
 	if err != nil {
 		return "", errors.WithMessage(err, "bucket.UploadPart")
 	}

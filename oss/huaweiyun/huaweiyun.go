@@ -41,7 +41,10 @@ func (huawei *Huaweiyun) Upload(key string, body io.Reader) (url string, err err
 	input.Bucket = huawei.cfg.Bucket
 	input.Key = key
 	input.Body = body
-	input.ContentLength = oss.GetSize(body)
+	input.ContentLength, err = oss.GetReaderLen(body)
+	if err != nil {
+		return
+	}
 	_, err = huawei.client.PutObject(input)
 	if err != nil {
 		return "", errors.WithMessage(err, "huawei.client.PutObject()")
@@ -112,8 +115,10 @@ func (huawei *Huaweiyun) UploadPart(key, uploadId string, body io.Reader, partNu
 	input.UploadId = uploadId
 	input.Body = body
 	input.PartNumber = int(partNumber)
-	input.PartSize = oss.GetSize(body)
-
+	input.PartSize, err = oss.GetReaderLen(body)
+	if err != nil {
+		return
+	}
 	output, err := huawei.client.UploadPart(input)
 	if err != nil {
 		return "", errors.WithMessage(err, "huawei.client.UploadPart")
