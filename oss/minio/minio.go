@@ -92,7 +92,7 @@ func (m *Minio) createClient() (err error) {
 	m.client, err = minio.NewCore(
 		m.cfg.EndPoint,
 		&minio.Options{
-			Creds: credentials.NewStaticV4(m.cfg.AccessKeyId, m.cfg.AccessKeySecret, ""),
+			Creds: credentials.NewStaticV2(m.cfg.AccessKeyId, m.cfg.AccessKeySecret, ""),
 			// todo
 			Secure: false,
 		})

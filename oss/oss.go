@@ -3,12 +3,6 @@ package oss
 import (
 	"bytes"
 	"io"
-
-	"github.com/pkg/errors"
-
-	"github.com/yywwann/chy-go-kit/oss/aliyun"
-	"github.com/yywwann/chy-go-kit/oss/huaweiyun"
-	"github.com/yywwann/chy-go-kit/oss/minio"
 )
 
 type OSS interface {
@@ -26,24 +20,6 @@ type Config struct {
 	AccessKeySecret string
 	Bucket          string
 	EndPoint        string
-}
-
-func New(c *Config) (oss OSS, err error) {
-	switch c.Cloud {
-	case huaweiyun.Cloud:
-		oss, err = huaweiyun.New(c)
-	case aliyun.Cloud:
-		oss, err = aliyun.New(c)
-	case minio.Cloud:
-		oss, err = minio.New(c)
-	default:
-		return nil, errors.New("oss: new oss service err")
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return oss, nil
 }
 
 type Part struct {
