@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/yywwann/chy-go-kit/oss"
+	"io/ioutil"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
 var (
 	minioConfig = &oss.Config{
 		UseSSL:          false,
-		AccessKeyId:     "AccessKeyId",
-		AccessKeySecret: "AccessKeySecret",
-		Bucket:          "Bucket",
-		EndPoint:        "EndPoint",
+		AccessKeyId:     "ikvVLFicIG",
+		AccessKeySecret: "ikvVLFicIG",
+		Bucket:          "fe-static-resources",
+		EndPoint:        "minio-fygs.seenew.info:180",
 	}
-	smFilePath = "smFilePath"
-	bgFilePath = "bgFilePath"
+	smFilePath = "/Users/xiniu/install.sh"
+	bgFilePath = "/Users/xiniu/Documents/install/thunder_4.2.1.65254.dmg"
 	OssMinio   = &Minio{}
 )
 
@@ -39,6 +42,7 @@ func TestMinio_Upload_sm(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer file.Close()
 
 	url, err := OssMinio.Upload("test_smFile.sh", file)
 	require.NoError(t, err)
@@ -122,4 +126,68 @@ func TestMinio_Multipart_bg(t *testing.T) {
 	url, err := OssMinio.CompleteMultipartUpload(key, uploadId, parts)
 	require.NoError(t, err)
 	t.Log(url)
+}
+
+//获取指定目录下的所有文件,包含子目录下的文件
+
+type File struct {
+	Path string
+	Key  string
+	Size int64
+}
+
+func GetAllFiles(dirPth string) (files []File, err error) {
+	var dirs []string
+	dir, err := ioutil.ReadDir(dirPth)
+	if err != nil {
+		return nil, err
+	}
+
+	//PthSep := string(os.PathSeparator)
+	for _, fi := range dir {
+		if fi.IsDir() { // 目录, 递归遍历
+			dirs = append(dirs, filepath.Join(dirPth, fi.Name()))
+		} else {
+			files = append(files, File{
+				Path: dirPth,
+				Key:  fi.Name(),
+				Size: fi.Size(),
+			})
+		}
+	}
+
+	// 读取子目录下文件
+	for _, table := range dirs {
+		temp, _ := GetAllFiles(table)
+		for _, temp1 := range temp {
+			files = append(files, temp1)
+		}
+	}
+
+	return files, nil
+}
+
+func TestMinio_Upload_Folder(t *testing.T) {
+	basePath := "/Users/xxx/Documents/"
+	baseDir := "深入剖析Kubernetes/代码/"
+	files, err := GetAllFiles(basePath + baseDir)
+	if err != nil {
+		t.Log(err)
+		return
+	}
+	for _, fileInfo := range files {
+		file, err := os.OpenFile(filepath.Join(fileInfo.Path, fileInfo.Key), os.O_RDONLY, os.ModePerm)
+		if err != nil {
+			t.Log(err)
+			continue
+		}
+		defer file.Close()
+
+		url, err := OssMinio.Upload(strings.TrimPrefix(filepath.Join(fileInfo.Path, fileInfo.Key), basePath), file)
+		if err != nil {
+			t.Log(err)
+			return
+		}
+		t.Log(url)
+	}
 }
