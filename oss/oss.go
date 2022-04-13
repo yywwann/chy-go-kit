@@ -2,7 +2,10 @@ package oss
 
 import (
 	"bytes"
+	"fmt"
 	"io"
+	"os"
+	"strings"
 )
 
 type OSS interface {
@@ -42,8 +45,25 @@ func (p Parts) Less(i, j int) bool {
 	return p[i].PartNumber < p[j].PartNumber
 }
 
-func GetSize(stream io.Reader) int64 {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stream)
-	return int64(buf.Len())
+func GetReaderLen(reader io.Reader) (int64, error) {
+	var contentLength int64
+	var err error
+	switch v := reader.(type) {
+	case *bytes.Buffer:
+		contentLength = int64(v.Len())
+	case *bytes.Reader:
+		contentLength = int64(v.Len())
+	case *strings.Reader:
+		contentLength = int64(v.Len())
+	case *os.File:
+		fInfo, fError := v.Stat()
+		if fError != nil {
+			err = fmt.Errorf("can't get reader content length,%s", fError.Error())
+		} else {
+			contentLength = fInfo.Size()
+		}
+	default:
+		err = fmt.Errorf("can't get reader content length,unkown reader type")
+	}
+	return contentLength, err
 }

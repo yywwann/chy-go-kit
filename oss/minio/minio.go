@@ -36,7 +36,11 @@ func New(cfg *oss.Config) (*Minio, error) {
 
 func (m *Minio) Upload(key string, body io.Reader) (url string, err error) {
 	ctx := context.Background()
-	_, err = m.client.PutObject(ctx, m.cfg.Bucket, key, body, oss.GetSize(body), "", "", minio.PutObjectOptions{})
+	size, err := oss.GetReaderLen(body)
+	if err != nil {
+		return "", err
+	}
+	_, err = m.client.PutObject(ctx, m.cfg.Bucket, key, body, size, "", "", minio.PutObjectOptions{})
 	if err != nil {
 		return "", errors.WithMessage(err, "minio.client.PutObject")
 	}
@@ -54,7 +58,11 @@ func (m *Minio) InitiateMultipartUpload(key string) (uploadId string, err error)
 
 func (m *Minio) UploadPart(key, uploadId string, body io.Reader, partNumber int32) (ETag string, err error) {
 	ctx := context.Background()
-	output, err := m.client.PutObjectPart(ctx, m.cfg.Bucket, key, uploadId, int(partNumber), body, oss.GetSize(body), "", "", nil)
+	size, err := oss.GetReaderLen(body)
+	if err != nil {
+		return "", err
+	}
+	output, err := m.client.PutObjectPart(ctx, m.cfg.Bucket, key, uploadId, int(partNumber), body, size, "", "", nil)
 	if err != nil {
 		return "", errors.WithMessage(err, "minio.client.PutObjectPart")
 	}
