@@ -17,10 +17,10 @@ import (
 var (
 	minioConfig = &oss.Config{
 		UseSSL:          false,
-		AccessKeyId:     "AccessKeyId",
-		AccessKeySecret: "AccessKeySecret",
-		Bucket:          "Bucket",
-		EndPoint:        "EndPoint",
+		AccessKeyId:     os.Getenv("OSS_MINIO_XN_TEST_ACCESS_KEY_ID"),
+		AccessKeySecret: os.Getenv("OSS_MINIO_XN_TEST_ACCESS_KEY_SECRET"),
+		Bucket:          os.Getenv("OSS_MINIO_XN_TEST_BUCKET"),
+		EndPoint:        os.Getenv("OSS_MINIO_XN_TEST_ENDPOINT"),
 	}
 	smFilePath = "/Users/xiniu/install.sh"
 	bgFilePath = "/Users/xiniu/Documents/install/thunder_4.2.1.65254.dmg"
