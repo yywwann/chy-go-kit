@@ -17,10 +17,10 @@ import (
 var (
 	minioConfig = &oss.Config{
 		UseSSL:          false,
-		AccessKeyId:     "ikvVLFicIG",
-		AccessKeySecret: "ikvVLFicIG",
-		Bucket:          "fe-static-resources",
-		EndPoint:        "minio-fygs.seenew.info:180",
+		AccessKeyId:     "AccessKeyId",
+		AccessKeySecret: "AccessKeySecret",
+		Bucket:          "Bucket",
+		EndPoint:        "EndPoint",
 	}
 	smFilePath = "/Users/xiniu/install.sh"
 	bgFilePath = "/Users/xiniu/Documents/install/thunder_4.2.1.65254.dmg"
@@ -168,7 +168,7 @@ func GetAllFiles(dirPth string) (files []File, err error) {
 }
 
 func TestMinio_Upload_Folder(t *testing.T) {
-	basePath := "/Users/xxx/Documents/"
+	basePath := "/Users/xiniu/Documents/"
 	baseDir := "深入剖析Kubernetes/代码/"
 	files, err := GetAllFiles(basePath + baseDir)
 	if err != nil {
@@ -188,6 +188,17 @@ func TestMinio_Upload_Folder(t *testing.T) {
 			t.Log(err)
 			return
 		}
+		t.Log(url)
+	}
+}
+
+func TestMinio_ListObjects(t *testing.T) {
+	prefix := "hbos-A/common"
+	urls, err := OssMinio.ListObjects(prefix)
+	if err != nil {
+		panic(err)
+	}
+	for _, url := range urls {
 		t.Log(url)
 	}
 }

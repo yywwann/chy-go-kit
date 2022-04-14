@@ -114,3 +114,14 @@ func (m *Minio) createClient() (err error) {
 func (m *Minio) parseUrl(key string) string {
 	return fmt.Sprintf("http://%s/%s/%s", m.cfg.EndPoint, m.cfg.Bucket, key)
 }
+
+func (m *Minio) ListObjects(prefix string) (urls []string, err error) {
+	files, err := m.client.ListObjects(m.cfg.Bucket, prefix, "", "", 0)
+	if err != nil {
+		return nil, errors.WithMessage(err, fmt.Sprintf("ListObjects with pre=%s", prefix))
+	}
+	for _, fi := range files.Contents {
+		urls = append(urls, m.parseUrl(fi.Key))
+	}
+	return urls, nil
+}
